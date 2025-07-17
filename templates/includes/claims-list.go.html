@@ -1,0 +1,10 @@
+{{ define "claims" }}
+<h1>User Information</h1>
+<h2>JWT Claims</h2>
+<p><strong>Access Token:</strong> {{ .AccessToken }}</p>
+<ul>
+	{{ range $key, $value := .Claims }}
+	<li><strong>{{ $key }}:</strong> {{ $value }}</li>
+	{{ end }}
+</ul>
+{{ end }}
