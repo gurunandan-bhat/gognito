@@ -26,7 +26,7 @@ func AuthInit(cfg *config.Config) error {
 		ClientSecret: cfg.AWS.ClientSecret,
 		RedirectURL:  cfg.AWS.RedirectURL,
 		Endpoint:     provider.Endpoint(),
-		Scopes:       []string{oidc.ScopeOpenID, "email"},
+		Scopes:       []string{"email"},
 	}
 
 	return nil
