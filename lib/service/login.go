@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gognito/lib/aws"
 	"net/http"
+	"net/url"
 
 	"golang.org/x/oauth2"
 )
@@ -15,10 +16,15 @@ func (s *Service) login(w http.ResponseWriter, r *http.Request) error {
 		return fmt.Errorf("error initialing auth config: %w", err)
 	}
 
-	url := aws.Oauth2Config.AuthCodeURL(state, oauth2.AccessTypeOnline)
+	urlStr := aws.Oauth2Config.AuthCodeURL(state, oauth2.AccessTypeOnline)
+	url, err := url.Parse(urlStr)
+	if err != nil {
+		return fmt.Errorf("error parsing url: %w", err)
+	}
+	values := url.Query()
+	fmt.Println("URL queries:", values)
 
-	fmt.Println("URL", url)
-	http.Redirect(w, r, url, http.StatusFound)
+	http.Redirect(w, r, urlStr, http.StatusFound)
 
 	return nil
 }

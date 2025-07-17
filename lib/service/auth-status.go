@@ -19,20 +19,24 @@ type claimsPage struct {
 
 func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 
-	fmt.Println("I got called")
-
 	ctx := context.Background()
 	code := r.URL.Query().Get("code")
+
+	// Check no one tampered with the request
+	state := r.URL.Query().Get("state")
+	if state != s.Config.AWS.State {
+		return errors.New("stae was modified!")
+	}
 
 	// Exchange the authorization code for a token
 	rawToken, err := aws.Oauth2Config.Exchange(ctx, code)
 	if err != nil {
 		return fmt.Errorf("error exchanging token: %w", err)
 	}
-	tokenString := rawToken.AccessToken
+	accessTokenStr := rawToken.AccessToken
 
 	// Parse the token (do signature verification for your use case in production)
-	token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
+	token, _, err := new(jwt.Parser).ParseUnverified(accessTokenStr, jwt.MapClaims{})
 	if err != nil {
 		return fmt.Errorf("error parsing token: %w", err)
 	}
@@ -46,7 +50,7 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 	// Prepare data for rendering the template
 	pageData := claimsPage{
 		Title:       "Cognito Callback with Claims",
-		AccessToken: tokenString,
+		AccessToken: accessTokenStr,
 		Claims:      claims,
 	}
 

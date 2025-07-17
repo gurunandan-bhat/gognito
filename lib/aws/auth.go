@@ -18,8 +18,6 @@ func AuthInit(cfg *config.Config) error {
 		return fmt.Errorf("error creating OIDC provider %w", err)
 	}
 
-	fmt.Println("Endpoint", provider.Endpoint())
-
 	// Set up OAuth2 config
 	Oauth2Config = oauth2.Config{
 		ClientID:     cfg.AWS.ClientID,
