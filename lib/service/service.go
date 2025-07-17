@@ -103,7 +103,7 @@ func (s *Service) setRoutes() {
 	s.Muxer.Method(http.MethodGet, "/another-action", serviceHandler((s.anotherAction)))
 	s.Muxer.Method(http.MethodGet, "/aws", serviceHandler(s.initAWS))
 	s.Muxer.Method(http.MethodGet, "/login", serviceHandler(s.login))
-	s.Muxer.Method(http.MethodGet, "/auth-status", serviceHandler(s.handleCallback))
+	s.Muxer.Method(http.MethodPost, "/auth-status", serviceHandler(s.handleCallback))
 }
 
 func (s *Service) getSessionVar(r *http.Request, name string) (any, error) {
