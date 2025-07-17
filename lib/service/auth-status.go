@@ -7,6 +7,7 @@ import (
 	"gognito/lib/aws"
 	"net/http"
 
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -14,6 +15,7 @@ type claimsPage struct {
 	Title       string
 	AccessToken string
 	Claims      jwt.MapClaims
+	Email       string
 	CurrVal     int
 }
 
@@ -35,6 +37,29 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 	}
 	accessTokenStr := rawToken.AccessToken
 
+	// Now extract id token
+	rawIDToken, ok := rawToken.Extra("id_token").(string)
+	if !ok {
+		return errors.New("no id token found")
+	}
+
+	p, err := oidc.NewProvider(ctx, s.Config.AWS.IssuerURL)
+	if err != nil {
+		return fmt.Errorf("error creating provider: %w", err)
+	}
+	verifier := p.Verifier(&oidc.Config{ClientID: s.Config.AWS.ClientID})
+	idToken, err := verifier.Verify(ctx, rawIDToken)
+	if err != nil {
+		return fmt.Errorf("error verifying ID token: %w", err)
+	}
+	var idClaims struct {
+		Email    string `json:"email"`
+		Verified bool   `json:"email_verified"`
+	}
+	if err := idToken.Claims(&idClaims); err != nil {
+		return fmt.Errorf("error extracting Claims: %w", err)
+	}
+
 	// Parse the token (do signature verification for your use case in production)
 	token, _, err := new(jwt.Parser).ParseUnverified(accessTokenStr, jwt.MapClaims{})
 	if err != nil {
@@ -51,6 +76,7 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 	pageData := claimsPage{
 		Title:       "Cognito Callback with Claims",
 		AccessToken: accessTokenStr,
+		Email:       idClaims.Email,
 		Claims:      claims,
 	}
 

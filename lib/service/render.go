@@ -37,7 +37,6 @@ func newTemplateCache(templateRoot string) (map[string]*template.Template, error
 		}
 
 		cache[name] = tSet
-		fmt.Println(name)
 	}
 
 	return cache, nil
