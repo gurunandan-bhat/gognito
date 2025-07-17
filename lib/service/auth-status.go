@@ -14,6 +14,7 @@ type claimsPage struct {
 	Title       string
 	AccessToken string
 	Claims      jwt.MapClaims
+	CurrVal     int
 }
 
 func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
@@ -48,7 +49,6 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 		AccessToken: tokenString,
 		Claims:      claims,
 	}
-	s.render(w, "claims.go.html", pageData, http.StatusOK)
 
-	return nil
+	return s.render(w, "claims.go.html", pageData, http.StatusOK)
 }
