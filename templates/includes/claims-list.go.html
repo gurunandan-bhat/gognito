@@ -2,8 +2,12 @@
 <h2>User Information</h2>
 <h3>JWT Claims</h3>
 <p>
-	<strong>Access Token:</strong><br />
-	<span class="small font-monospace text-break">{{ .AccessToken }}</span>
+	<strong>Access Token:</strong>({{- len .AccessToken }} chars)<br />
+	<span class="small font-monospace" style="word-break: break-all">{{ .AccessToken }}</span>
+</p>
+<p>
+	<strong>Refresh Token:</strong>({{- len .RefreshToken }} chars)<br />
+	<span class="small font-monospace" style="word-break: break-all">{{ .RefreshToken }}</span>
 </p>
 <ul>
 	{{ range $key, $value := .Claims }}

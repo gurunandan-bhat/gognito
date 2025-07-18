@@ -12,11 +12,12 @@ import (
 )
 
 type claimsPage struct {
-	Title       string
-	AccessToken string
-	Claims      jwt.MapClaims
-	Email       string
-	CurrVal     int
+	Title        string
+	AccessToken  string
+	RefreshToken string
+	Claims       jwt.MapClaims
+	Email        string
+	CurrVal      int
 }
 
 func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
@@ -36,6 +37,7 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 		return fmt.Errorf("error exchanging token: %w", err)
 	}
 	accessTokenStr := rawToken.AccessToken
+	refreshTokenStr := rawToken.RefreshToken
 
 	// Now extract id token
 	rawIDToken, ok := rawToken.Extra("id_token").(string)
@@ -74,10 +76,11 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 
 	// Prepare data for rendering the template
 	pageData := claimsPage{
-		Title:       "Cognito Callback with Claims",
-		AccessToken: accessTokenStr,
-		Email:       idClaims.Email,
-		Claims:      claims,
+		Title:        "Cognito Callback with Claims",
+		AccessToken:  accessTokenStr,
+		RefreshToken: refreshTokenStr,
+		Email:        idClaims.Email,
+		Claims:       claims,
 	}
 
 	return s.render(w, "claims.go.html", pageData, http.StatusOK)

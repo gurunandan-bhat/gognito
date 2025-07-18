@@ -15,7 +15,7 @@ func (s *Service) login(w http.ResponseWriter, r *http.Request) error {
 		return fmt.Errorf("error initialing auth config: %w", err)
 	}
 
-	urlStr := aws.Oauth2Config.AuthCodeURL(state, oauth2.AccessTypeOnline)
+	urlStr := aws.Oauth2Config.AuthCodeURL(state, oauth2.AccessTypeOffline)
 	// url, err := url.Parse(urlStr)
 	// if err != nil {
 	// 	return fmt.Errorf("error parsing url: %w", err)
