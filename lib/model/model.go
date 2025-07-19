@@ -1,12 +1,9 @@
 package model
 
 import (
-	"log"
-	"net/http"
-	"time"
 	"gognito/lib/config"
-
-	mysqlstore "github.com/danielepintore/gorilla-sessions-mysql"
+	"log"
+	"time"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -47,24 +44,4 @@ func NewModel(cfg *config.Config) (*Model, error) {
 	return &Model{
 		DbHandle: dbHandle,
 	}, nil
-}
-
-func (m *Model) NewDbSessionStore(cfg *config.Config) (*mysqlstore.MysqlStore, error) {
-
-	keyPair := mysqlstore.KeyPair{
-		AuthenticationKey: []byte(cfg.Session.AuthenticationKey),
-		EncryptionKey:     []byte(cfg.Session.EncryptionKey),
-	}
-
-	cleanupAfter := 60 * time.Minute
-	return mysqlstore.NewMysqlStore(
-		m.DbHandle.DB,
-		"mdbsession",
-		[]mysqlstore.KeyPair{keyPair},
-		mysqlstore.WithCleanupInterval(cleanupAfter),
-		mysqlstore.WithHttpOnly(true),
-		mysqlstore.WithSameSite(http.SameSiteLaxMode),
-		mysqlstore.WithMaxAge(cfg.Session.MaxAgeHours*3600),
-		mysqlstore.WithSecure(cfg.InProduction),
-	)
 }

@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"gognito/lib/config"
 	"gognito/lib/model"
 	"html/template"
@@ -59,12 +58,15 @@ func NewService(cfg *config.Config) (*Service, error) {
 	)
 	mux.Use(csrfMiddleware)
 
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	mux.Use(newSlogger(cfg, logger))
+
 	model, err := model.NewModel(cfg)
 	if err != nil {
-		log.Fatalf("error initializing database connection: %s", err)
+		log.Fatalf("error initializing model: %s", err)
 	}
 
-	dbStore, err := model.NewDbSessionStore(cfg)
+	sessionStore, err := newDbSessionStore(cfg, model)
 	if err != nil {
 		log.Fatalf("error initializing db store: %s", err)
 	}
@@ -79,11 +81,9 @@ func NewService(cfg *config.Config) (*Service, error) {
 		log.Fatalf("Cannot build template cache: %s", err)
 	}
 
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-
 	s := &Service{
 		Config:       cfg,
-		SessionStore: dbStore,
+		SessionStore: sessionStore,
 		Model:        model,
 		Muxer:        mux,
 		Template:     template,
@@ -104,26 +104,5 @@ func (s *Service) setRoutes() {
 	s.Muxer.Method(http.MethodGet, "/aws", serviceHandler(s.initAWS))
 	s.Muxer.Method(http.MethodGet, "/login", serviceHandler(s.login))
 	s.Muxer.Method(http.MethodGet, "/auth-status", serviceHandler(s.handleCallback))
-}
-
-func (s *Service) getSessionVar(r *http.Request, name string) (any, error) {
-
-	sessionName := s.Config.Session.Name
-	session, err := s.SessionStore.Get(r, sessionName)
-	if err != nil {
-		return nil, fmt.Errorf("error fetching session %s: %w", sessionName, err)
-	}
-	return session.Values[name], nil
-}
-
-func (s *Service) setSessionVar(r *http.Request, w http.ResponseWriter, name string, value any) error {
-
-	sessionName := s.Config.Session.Name
-	session, err := s.SessionStore.Get(r, sessionName)
-	if err != nil {
-		return fmt.Errorf("error fetching session %s: %w", sessionName, err)
-	}
-
-	session.Values[name] = value
-	return session.Save(r, w)
+	s.Muxer.Method(http.MethodGet, "/form", serviceHandler(s.form))
 }

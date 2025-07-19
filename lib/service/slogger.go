@@ -1,9 +1,9 @@
 package service
 
 import (
+	"gognito/lib/config"
 	"log/slog"
 	"net/http"
-	"gognito/lib/config"
 
 	"github.com/go-chi/httplog/v3"
 )
