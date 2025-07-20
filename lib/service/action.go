@@ -5,9 +5,10 @@ import (
 )
 
 type actionPageData struct {
-	Title   string
-	Message string
-	CurrVal int
+	AuthState AuthInfo
+	Title     string
+	Message   string
+	CurrVal   int
 }
 
 func (s *Service) action(w http.ResponseWriter, r *http.Request) error {

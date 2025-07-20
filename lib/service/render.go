@@ -25,6 +25,7 @@ func newTemplateCache(templateRoot string) (map[string]*template.Template, error
 			templateRoot + "/common/top-menu.go.html",
 			templateRoot + "/common/footer.go.html",
 			templateRoot + "/common/js-includes.go.html",
+			templateRoot + "/common/auth-state.go.html",
 			page,
 		}
 		tSet, err := template.ParseFiles(files...)

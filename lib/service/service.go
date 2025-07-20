@@ -1,13 +1,16 @@
 package service
 
 import (
+	"fmt"
 	"gognito/lib/config"
 	"gognito/lib/model"
 	"html/template"
 	"log"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 
 	mysqlstore "github.com/danielepintore/gorilla-sessions-mysql"
@@ -16,6 +19,8 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/gorilla/csrf"
 )
+
+var logoutURL string
 
 type Service struct {
 	Config       *config.Config
@@ -81,6 +86,11 @@ func NewService(cfg *config.Config) (*Service, error) {
 		log.Fatalf("Cannot build template cache: %s", err)
 	}
 
+	logoutURL, err = mkLogoutURL(cfg.AWS.AppDomain, cfg.AWS.ClientID, cfg.AWS.LogoutURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	s := &Service{
 		Config:       cfg,
 		SessionStore: sessionStore,
@@ -105,4 +115,23 @@ func (s *Service) setRoutes() {
 	s.Muxer.Method(http.MethodGet, "/login", serviceHandler(s.login))
 	s.Muxer.Method(http.MethodGet, "/auth-status", serviceHandler(s.handleCallback))
 	s.Muxer.Method(http.MethodGet, "/form", serviceHandler(s.validateAuth(s.form)))
+	s.Muxer.Method(http.MethodGet, "/logout", serviceHandler(s.logout))
+}
+
+func mkLogoutURL(baseURLStr, clientID, logoutURL string) (string, error) {
+
+	u, err := url.Parse(baseURLStr)
+	if err != nil {
+		fmt.Println("Error parsing URL:", err)
+		return "", fmt.Errorf("error parsing baseurl: %w", err)
+	}
+	u.Path = path.Join(u.Path, "logout")
+
+	params := make(url.Values)
+	params.Set("client_id", clientID)
+	params.Add("logout_uri", logoutURL)
+
+	u.RawQuery = params.Encode()
+
+	return u.String(), nil
 }

@@ -39,8 +39,10 @@ type Config struct {
 	AWS struct {
 		ClientID     string `json:"clientID,omitempty"`
 		ClientSecret string `json:"clientSecret,omitempty"`
+		AppDomain    string `json:"appDomain,omitempty"`
 		IssuerURL    string `json:"issuerURL,omitempty"`
 		RedirectURL  string `json:"redirectURL,omitempty"`
+		LogoutURL    string `json:"logoutURL,omitempty"`
 		State        string `json:"state,omitempty"`
 	} `json:"aws,omitzero"`
 }

@@ -13,6 +13,7 @@ import (
 )
 
 type claimsPage struct {
+	AuthState    AuthInfo
 	Title        string
 	AccessToken  string
 	RefreshToken string
@@ -77,9 +78,10 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	auth := AuthInfo{
-		Name:    idClaims.Name,
-		Email:   idClaims.Email,
-		Expires: rawToken.Expiry,
+		Name:      idClaims.Name,
+		Email:     idClaims.Email,
+		Expires:   rawToken.Expiry,
+		LogoutURL: logoutURL,
 	}
 	fmt.Printf("%+v\n", auth)
 
@@ -89,6 +91,7 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 
 	// Prepare data for rendering the template
 	pageData := claimsPage{
+		AuthState:    auth,
 		Title:        "Cognito Callback with Claims",
 		AccessToken:  accessTokenStr,
 		RefreshToken: refreshTokenStr,
