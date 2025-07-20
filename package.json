@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@tabler/core": "^1.4.0",
+    "prettier": "^3.6.2",
     "prettier-plugin-go-template": "^0.0.15"
   }
 }

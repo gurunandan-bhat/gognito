@@ -1,0 +1,7 @@
+{{ define "authState" }}
+    {{ with .AuthState }}
+        Logged In
+    {{ else }}
+        <a class="bare-nav-item nav-link" href="/login">Login</a>
+    {{ end }}
+{{ end }}
