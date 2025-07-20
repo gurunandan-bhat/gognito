@@ -9,6 +9,7 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/oauth2"
 )
 
 type claimsPage struct {
@@ -33,7 +34,7 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	// Exchange the authorization code for a token
-	rawToken, err := aws.Oauth2Config.Exchange(ctx, code)
+	rawToken, err := aws.Oauth2Config.Exchange(ctx, code, oauth2.VerifierOption(codeVerifier))
 	if err != nil {
 		return fmt.Errorf("error exchanging token: %w", err)
 	}
