@@ -12,11 +12,10 @@ import (
 )
 
 type AuthInfo struct {
-	Email        string
-	Roles        []string
-	AccessToken  string
-	RefreshToken string
-	Expires      time.Time
+	Name    string
+	Email   string
+	Roles   []string
+	Expires time.Time
 }
 
 func newDbSessionStore(cfg *config.Config, m *model.Model) (*mysqlstore.MysqlStore, error) {

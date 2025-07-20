@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 )
@@ -40,9 +41,9 @@ func (s *Service) validateAuth(next serviceHandler) serviceHandler {
 		if err != nil {
 			return err
 		}
-
+		fmt.Printf("Inside middleware handler: %+v\n", auth)
 		authData, ok := auth.(AuthInfo)
-		if ok || time.Now().After(authData.Expires) {
+		if ok || time.Now().Before(authData.Expires) {
 			http.Redirect(w, r, "/login", http.StatusFound)
 		}
 
