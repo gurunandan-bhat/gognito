@@ -10,11 +10,10 @@ import (
 )
 
 var Oauth2Config = oauth2.Config{}
-var Provider *oidc.Provider
 
 func AuthInit(cfg *config.Config) error {
 
-	Provider, err := oidc.NewProvider(context.Background(), cfg.AWS.IssuerURL)
+	provider, err := oidc.NewProvider(context.Background(), cfg.AWS.IssuerURL)
 	if err != nil {
 		return fmt.Errorf("error creating OIDC provider %w", err)
 	}
@@ -24,8 +23,8 @@ func AuthInit(cfg *config.Config) error {
 		ClientID:     cfg.AWS.ClientID,
 		ClientSecret: cfg.AWS.ClientSecret,
 		RedirectURL:  cfg.AWS.RedirectURL,
-		Endpoint:     Provider.Endpoint(),
-		Scopes:       []string{oidc.ScopeOpenID, "email"},
+		Endpoint:     provider.Endpoint(),
+		Scopes:       []string{oidc.ScopeOpenID, "email", "profile"},
 	}
 
 	return nil

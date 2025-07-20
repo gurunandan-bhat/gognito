@@ -16,6 +16,7 @@ type claimsPage struct {
 	AccessToken  string
 	RefreshToken string
 	Claims       jwt.MapClaims
+	Name         string
 	Email        string
 	CurrVal      int
 }
@@ -55,13 +56,13 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 		return fmt.Errorf("error verifying ID token: %w", err)
 	}
 	var idClaims struct {
+		Name     string `json:"name,omitempty"`
 		Email    string `json:"email"`
 		Verified bool   `json:"email_verified"`
 	}
 	if err := idToken.Claims(&idClaims); err != nil {
 		return fmt.Errorf("error extracting Claims: %w", err)
 	}
-
 	// Parse the token (do signature verification for your use case in production)
 	token, _, err := new(jwt.Parser).ParseUnverified(accessTokenStr, jwt.MapClaims{})
 	if err != nil {
@@ -73,7 +74,6 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 	if !ok {
 		return errors.New("invalid claims")
 	}
-	fmt.Printf("Type of roles is %T\n", claims["cognito:groups"])
 
 	// auth := AuthInfo{
 	// 	Email:        idClaims.Email,
@@ -92,8 +92,9 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 		Title:        "Cognito Callback with Claims",
 		AccessToken:  accessTokenStr,
 		RefreshToken: refreshTokenStr,
-		// Email:        idClaims.Email,
-		Claims: claims,
+		Name:         idClaims.Name,
+		Email:        idClaims.Email,
+		Claims:       claims,
 	}
 
 	return s.render(w, "claims.go.html", pageData, http.StatusOK)
