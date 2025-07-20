@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type claimsPage struct {
@@ -73,14 +73,27 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 	if !ok {
 		return errors.New("invalid claims")
 	}
+	fmt.Printf("Type of roles is %T\n", claims["cognito:groups"])
+
+	// auth := AuthInfo{
+	// 	Email:        idClaims.Email,
+	// 	AccessToken:  accessTokenStr,
+	// 	RefreshToken: refreshTokenStr,
+	// 	Expires:      rawToken.Expiry,
+	// }
+	// fmt.Printf("%+v\n", auth)
+
+	// if err := s.setSessionVar(r, w, "authInfo", auth); err != nil {
+	// 	return fmt.Errorf("unable to set auth value in session: %w", err)
+	// }
 
 	// Prepare data for rendering the template
 	pageData := claimsPage{
 		Title:        "Cognito Callback with Claims",
 		AccessToken:  accessTokenStr,
 		RefreshToken: refreshTokenStr,
-		Email:        idClaims.Email,
-		Claims:       claims,
+		// Email:        idClaims.Email,
+		Claims: claims,
 	}
 
 	return s.render(w, "claims.go.html", pageData, http.StatusOK)

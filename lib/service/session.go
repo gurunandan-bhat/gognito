@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/gob"
 	"fmt"
 	"gognito/lib/config"
 	"gognito/lib/model"
@@ -10,6 +11,14 @@ import (
 	mysqlstore "github.com/danielepintore/gorilla-sessions-mysql"
 )
 
+type AuthInfo struct {
+	Email        string
+	Roles        []string
+	AccessToken  string
+	RefreshToken string
+	Expires      time.Time
+}
+
 func newDbSessionStore(cfg *config.Config, m *model.Model) (*mysqlstore.MysqlStore, error) {
 
 	keyPair := mysqlstore.KeyPair{
@@ -17,10 +26,8 @@ func newDbSessionStore(cfg *config.Config, m *model.Model) (*mysqlstore.MysqlSto
 		EncryptionKey:     []byte(cfg.Session.EncryptionKey),
 	}
 
-	// m, err := model.NewModel(cfg)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("error creating raw model: %w", err)
-	// }
+	// register so gorilla can save complex data structures
+	gob.Register(&AuthInfo{})
 
 	cleanupAfter := 60 * time.Minute
 	return mysqlstore.NewMysqlStore(

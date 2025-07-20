@@ -104,5 +104,5 @@ func (s *Service) setRoutes() {
 	s.Muxer.Method(http.MethodGet, "/aws", serviceHandler(s.initAWS))
 	s.Muxer.Method(http.MethodGet, "/login", serviceHandler(s.login))
 	s.Muxer.Method(http.MethodGet, "/auth-status", serviceHandler(s.handleCallback))
-	s.Muxer.Method(http.MethodGet, "/form", serviceHandler(s.form))
+	s.Muxer.Method(http.MethodGet, "/form", serviceHandler(s.validateAuth(s.form)))
 }
