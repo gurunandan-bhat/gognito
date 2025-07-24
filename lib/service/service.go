@@ -133,5 +133,6 @@ func mkLogoutURL(baseURLStr, clientID, logoutURL string) (string, error) {
 
 	u.RawQuery = params.Encode()
 
+	fmt.Println("logout_uri:", u.String())
 	return u.String(), nil
 }
