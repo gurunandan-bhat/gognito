@@ -42,6 +42,7 @@ type Config struct {
 		AppDomain    string `json:"appDomain,omitempty"`
 		IssuerURL    string `json:"issuerURL,omitempty"`
 		RedirectURL  string `json:"redirectURL,omitempty"`
+		KeySetURL    string `json:"keySetURL,omitempty"`
 		LogoutURL    string `json:"logoutURL,omitempty"`
 		State        string `json:"state,omitempty"`
 	} `json:"aws,omitzero"`

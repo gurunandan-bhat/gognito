@@ -44,7 +44,7 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 	accessTokenStr := rawToken.AccessToken
 	kf, err := keyfunc.NewDefaultCtx(
 		context.Background(),
-		[]string{"https://cognito-idp.ap-south-1.amazonaws.com/ap-south-1_v9zPYbL0O/.well-known/jwks.json"},
+		[]string{s.Config.AWS.KeySetURL},
 	)
 	if err != nil {
 		return fmt.Errorf("error fetching JW Keyset from Amazon: %w", err)

@@ -34,6 +34,7 @@ func newDbSessionStore(cfg *config.Config, m *model.Model) (*mysqlstore.MysqlSto
 		m.DbHandle.DB,
 		"mdbsession",
 		[]mysqlstore.KeyPair{keyPair},
+		mysqlstore.WithPath("/"),
 		mysqlstore.WithCleanupInterval(cleanupAfter),
 		mysqlstore.WithHttpOnly(true),
 		mysqlstore.WithSameSite(http.SameSiteLaxMode),
@@ -42,7 +43,7 @@ func newDbSessionStore(cfg *config.Config, m *model.Model) (*mysqlstore.MysqlSto
 	)
 }
 
-func (s *Service) getSessionVar(r *http.Request, name string) (any, error) {
+func (s *Service) getSessionVar(r *http.Request, name any) (any, error) {
 
 	sessionName := s.Config.Session.Name
 	session, err := s.SessionStore.Get(r, sessionName)
@@ -50,7 +51,8 @@ func (s *Service) getSessionVar(r *http.Request, name string) (any, error) {
 		return nil, fmt.Errorf("error fetching session %s: %w", sessionName, err)
 	}
 
-	return session.Values[name], nil
+	fmt.Printf("Geeting session var %s: %+v\n", name, session.Values[name.(string)])
+	return session.Values[name.(string)], nil
 }
 
 func (s *Service) setSessionVar(r *http.Request, w http.ResponseWriter, name string, value any) error {
