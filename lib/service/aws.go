@@ -14,5 +14,5 @@ func (s *Service) initAWS(w http.ResponseWriter, r *http.Request) error {
 
 	aws.Init()
 
-	return s.render(w, "index.go.html", data, http.StatusOK)
+	return s.render(w, r, "index.go.html", data, http.StatusOK)
 }

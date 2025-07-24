@@ -5,10 +5,8 @@ import (
 )
 
 type anotherActionPageData struct {
-	AuthState AuthInfo
-	Title     string
-	Message   string
-	CurrVal   int
+	Title   string
+	Message string
 }
 
 func (s *Service) anotherAction(w http.ResponseWriter, r *http.Request) error {
@@ -18,5 +16,5 @@ func (s *Service) anotherAction(w http.ResponseWriter, r *http.Request) error {
 		Message: "This is another Action Page",
 	}
 
-	return s.render(w, "index.go.html", data, http.StatusOK)
+	return s.render(w, r, "index.go.html", data, http.StatusOK)
 }

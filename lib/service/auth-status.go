@@ -6,21 +6,21 @@ import (
 	"fmt"
 	"gognito/lib/aws"
 	"net/http"
+	"time"
 
+	"github.com/MicahParks/keyfunc/v3"
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/oauth2"
 )
 
 type claimsPage struct {
-	AuthState    AuthInfo
 	Title        string
 	AccessToken  string
 	RefreshToken string
 	Claims       jwt.MapClaims
 	Name         string
 	Email        string
-	CurrVal      int
 }
 
 func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
@@ -39,10 +39,39 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return fmt.Errorf("error exchanging token: %w", err)
 	}
-	accessTokenStr := rawToken.AccessToken
-	refreshTokenStr := rawToken.RefreshToken
 
-	// Now extract id token
+	// Get claims from access token
+	accessTokenStr := rawToken.AccessToken
+	kf, err := keyfunc.NewDefaultCtx(
+		context.Background(),
+		[]string{"https://cognito-idp.ap-south-1.amazonaws.com/ap-south-1_v9zPYbL0O/.well-known/jwks.json"},
+	)
+	if err != nil {
+		return fmt.Errorf("error fetching JW Keyset from Amazon: %w", err)
+	}
+
+	// Parse the token (do signature verification for your use case in production)
+	// See: https://www.angelospanag.me/blog/verifying-a-json-web-token-from-cognito-in-go-and-gin
+	// The article checks every claim for reasonable value but we only check for algorith and
+	// expiration time and issuer
+	token, err := jwt.Parse(
+		accessTokenStr,
+		kf.Keyfunc,
+		jwt.WithValidMethods([]string{"RS256"}),
+		jwt.WithExpirationRequired(),
+		jwt.WithIssuer(s.Config.AWS.IssuerURL),
+	)
+	if err != nil {
+		return fmt.Errorf("error parsing token: %w", err)
+	}
+
+	// Check if the token is valid and extract claims
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return errors.New("invalid claims")
+	}
+
+	// Get claims from id token
 	rawIDToken, ok := rawToken.Extra("id_token").(string)
 	if !ok {
 		return errors.New("no id token found")
@@ -65,22 +94,13 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 	if err := idToken.Claims(&idClaims); err != nil {
 		return fmt.Errorf("error extracting Claims: %w", err)
 	}
-	// Parse the token (do signature verification for your use case in production)
-	token, _, err := new(jwt.Parser).ParseUnverified(accessTokenStr, jwt.MapClaims{})
-	if err != nil {
-		return fmt.Errorf("error parsing token: %w", err)
-	}
 
-	// Check if the token is valid and extract claims
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return errors.New("invalid claims")
-	}
+	refreshTokenStr := rawToken.RefreshToken
 
 	auth := AuthInfo{
 		Name:      idClaims.Name,
 		Email:     idClaims.Email,
-		Expires:   rawToken.Expiry,
+		Expires:   time.Now().Add(time.Duration(rawToken.ExpiresIn) * time.Second),
 		LogoutURL: logoutURL,
 	}
 	fmt.Printf("%+v\n", auth)
@@ -91,7 +111,6 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 
 	// Prepare data for rendering the template
 	pageData := claimsPage{
-		AuthState:    auth,
 		Title:        "Cognito Callback with Claims",
 		AccessToken:  accessTokenStr,
 		RefreshToken: refreshTokenStr,
@@ -100,5 +119,6 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 		Claims:       claims,
 	}
 
-	return s.render(w, "claims.go.html", pageData, http.StatusOK)
+	// fmt.Printf("%+v\n", pageData)
+	return s.render(w, r, "claims.go.html", pageData, http.StatusOK)
 }

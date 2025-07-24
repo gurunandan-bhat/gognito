@@ -49,6 +49,7 @@ func (s *Service) getSessionVar(r *http.Request, name string) (any, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error fetching session %s: %w", sessionName, err)
 	}
+
 	return session.Values[name], nil
 }
 

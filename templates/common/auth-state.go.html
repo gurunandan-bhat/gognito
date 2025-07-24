@@ -1,7 +1,7 @@
 {{ define "authState" }}
-    {{ if .AuthState.Name }}
-        <a class="bare-nav-item nav-link" href="{{ .AuthState.LogoutURL }}"
-            >{{ .AuthState.Name }}</a
+    {{ if .Common.Name }}
+        <a class="bare-nav-item nav-link" href="{{ .Common.LogoutURL }}"
+            >{{ .Common.Name }}</a
         >
     {{ else }}
         <a class="bare-nav-item nav-link" href="/login">Login</a>

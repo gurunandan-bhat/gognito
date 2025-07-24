@@ -41,12 +41,14 @@ func (s *Service) validateAuth(next serviceHandler) serviceHandler {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Inside middleware handler: %+v\n", auth)
 		authData, ok := auth.(AuthInfo)
-		if ok || time.Now().Before(authData.Expires) {
+		fmt.Printf("In middleware dumping auth data: %+v\n", authData)
+		if !ok || time.Now().After(authData.Expires) {
+			fmt.Println("Redirecting", time.Now(), authData.Expires)
 			http.Redirect(w, r, "/login", http.StatusFound)
 		}
 
+		fmt.Println("Redirecting", time.Now(), authData.Expires)
 		return next(w, r)
 	}
 }

@@ -43,12 +43,29 @@ func newTemplateCache(templateRoot string) (map[string]*template.Template, error
 	return cache, nil
 }
 
-func (s *Service) render(w http.ResponseWriter, template string, data any, status int) error {
+func (s *Service) render(w http.ResponseWriter, r *http.Request, template string, data any, status int) error {
 
 	// Check whether that template exists in the cache
 	tmpl, ok := s.Template[template]
 	if !ok {
 		return fmt.Errorf("template %s is not available in the cache", template)
+	}
+
+	authState, err := s.getSessionVar(r, "authInfo")
+	if err != nil {
+		return fmt.Errorf("render error fetching auth state: %w", err)
+	}
+
+	if authState == nil {
+		authState = AuthInfo{}
+	}
+
+	data = struct {
+		Common   any
+		PageData any
+	}{
+		Common:   authState,
+		PageData: data,
 	}
 
 	var b bytes.Buffer

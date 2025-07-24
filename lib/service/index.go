@@ -1,30 +1,20 @@
 package service
 
 import (
-	"fmt"
 	"net/http"
 )
 
 type IndexPageData struct {
-	AuthState AuthInfo
-	Title     string
-	Message   string
-	CurrVal   int
+	Title   string
+	Message string
 }
 
 func (s *Service) index(w http.ResponseWriter, r *http.Request) error {
 
-	iCurrVal := int(1)
 	data := IndexPageData{
 		Title:   "Home",
 		Message: "This is the Home Page",
-		CurrVal: iCurrVal,
 	}
 
-	currVal := int(1)
-	if err := s.setSessionVar(r, w, "currval", currVal); err != nil {
-		return fmt.Errorf("error saving key currval to %d: %w", currVal, err)
-	}
-
-	return s.render(w, "index.go.html", data, http.StatusOK)
+	return s.render(w, r, "index.go.html", data, http.StatusOK)
 }

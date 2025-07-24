@@ -1,19 +1,25 @@
 {{ define "claims-list" }}
-<h2>User Information</h2>
-<h3>JWT Claims</h3>
-<p>
-	<strong>Access Token:</strong>({{- len .AccessToken }} chars)<br />
-	<span class="small font-monospace" style="word-break: break-all">{{ .AccessToken }}</span>
-</p>
-<p>
-	<strong>Refresh Token:</strong>({{- len .RefreshToken }} chars)<br />
-	<span class="small font-monospace" style="word-break: break-all">{{ .RefreshToken }}</span>
-</p>
-<ul>
-	{{ range $key, $value := .Claims }}
-	<li><strong>{{ $key }}:</strong> {{ $value }}</li>
-	{{ end }}
-	<li><strong>name:</strong> {{ .Name }}</li>
-	<li><strong>email:</strong> {{ .Email }}</li>
-</ul>
+    <h2>User Information</h2>
+    <h3>JWT Claims</h3>
+    <p>
+        <strong>Access Token:</strong>({{- len .PageData.AccessToken }}
+        chars)<br />
+        <span class="small font-monospace" style="word-break: break-all"
+            >{{ .PageData.AccessToken }}</span
+        >
+    </p>
+    <p>
+        <strong>Refresh Token:</strong>({{- len .PageData.RefreshToken }}
+        chars)<br />
+        <span class="small font-monospace" style="word-break: break-all"
+            >{{ .PageData.RefreshToken }}</span
+        >
+    </p>
+    <ul>
+        {{ range $key, $value := .PageData.Claims }}
+            <li><strong>{{ $key }}:</strong> {{ $value }}</li>
+        {{ end }}
+        <li><strong>name:</strong> {{ .PageData.Name }}</li>
+        <li><strong>email:</strong> {{ .PageData.Email }}</li>
+    </ul>
 {{ end }}
