@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"gognito/lib/aws"
 	"net/http"
-	"time"
 
 	"github.com/MicahParks/keyfunc/v3"
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -18,6 +17,7 @@ type claimsPage struct {
 	Title        string
 	AccessToken  string
 	RefreshToken string
+	IDToken      string
 	Claims       jwt.MapClaims
 	Name         string
 	Email        string
@@ -70,9 +70,13 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 	if !ok {
 		return errors.New("invalid claims")
 	}
+	expires, err := claims.GetExpirationTime()
+	if err != nil {
+		return fmt.Errorf("error extracting expiration time from id token claims: %w", err)
+	}
 
 	// Get claims from id token
-	rawIDToken, ok := rawToken.Extra("id_token").(string)
+	idTokenStr, ok := rawToken.Extra("id_token").(string)
 	if !ok {
 		return errors.New("no id token found")
 	}
@@ -82,10 +86,11 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 		return fmt.Errorf("error creating provider: %w", err)
 	}
 	verifier := p.Verifier(&oidc.Config{ClientID: s.Config.AWS.ClientID})
-	idToken, err := verifier.Verify(ctx, rawIDToken)
+	idToken, err := verifier.Verify(ctx, idTokenStr)
 	if err != nil {
 		return fmt.Errorf("error verifying ID token: %w", err)
 	}
+
 	var idClaims struct {
 		Name     string `json:"name,omitempty"`
 		Email    string `json:"email"`
@@ -100,10 +105,9 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 	auth := AuthInfo{
 		Name:      idClaims.Name,
 		Email:     idClaims.Email,
-		Expires:   time.Now().Add(time.Duration(rawToken.ExpiresIn) * time.Second),
+		Expires:   expires.Time,
 		LogoutURL: logoutURL,
 	}
-	fmt.Printf("%+v\n", auth)
 
 	if err := s.setSessionVar(r, w, "authInfo", auth); err != nil {
 		return fmt.Errorf("unable to set auth value in session: %w", err)
@@ -111,9 +115,10 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 
 	// Prepare data for rendering the template
 	pageData := claimsPage{
-		Title:        "Cognito Callback with Claims",
+		Title:        "AWS Cognito Callback with Claims",
 		AccessToken:  accessTokenStr,
 		RefreshToken: refreshTokenStr,
+		IDToken:      idTokenStr,
 		Name:         idClaims.Name,
 		Email:        idClaims.Email,
 		Claims:       claims,

@@ -15,6 +15,13 @@
             >{{ .PageData.RefreshToken }}</span
         >
     </p>
+    <p>
+        <strong>ID Token:</strong>({{- len .PageData.IDToken }}
+        chars)<br />
+        <span class="small font-monospace" style="word-break: break-all"
+            >{{ .PageData.IDToken }}</span
+        >
+    </p>
     <ul>
         {{ range $key, $value := .PageData.Claims }}
             <li><strong>{{ $key }}:</strong> {{ $value }}</li>

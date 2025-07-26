@@ -51,7 +51,6 @@ func (s *Service) getSessionVar(r *http.Request, name any) (any, error) {
 		return nil, fmt.Errorf("error fetching session %s: %w", sessionName, err)
 	}
 
-	fmt.Printf("Geeting session var %s: %+v\n", name, session.Values[name.(string)])
 	return session.Values[name.(string)], nil
 }
 
