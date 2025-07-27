@@ -19,7 +19,7 @@ var stateLength = 32
 
 func (s *Service) login(w http.ResponseWriter, r *http.Request) error {
 
-	authInfo, err := s.getSessionVar(r, "authInfo")
+	authInfo, _ := s.getSessionVar(r, "authInfo")
 	if authInfo != nil {
 		authData := authInfo.(*AuthInfo)
 		if time.Now().Before(authData.Expires) {
@@ -34,13 +34,16 @@ func (s *Service) login(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	buf := make([]byte, stateLength)
-	_, err = io.ReadFull(rand.Reader, buf)
+	_, err := io.ReadFull(rand.Reader, buf)
 	if err != nil {
 		return fmt.Errorf("error generating %d random bytes: %v", stateLength, err)
 	}
 	codeVerifier = hex.EncodeToString(buf)
 	sha2 := sha256.New()
-	io.WriteString(sha2, codeVerifier)
+	_, err = io.WriteString(sha2, codeVerifier)
+	if err != nil {
+		return fmt.Errorf("error encoding verifier to SHA256: %w", err)
+	}
 	codeChallenge := base64.RawURLEncoding.EncodeToString(sha2.Sum(nil))
 
 	urlStr := aws.Oauth2Config.AuthCodeURL(

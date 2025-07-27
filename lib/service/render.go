@@ -75,7 +75,9 @@ func (s *Service) render(w http.ResponseWriter, r *http.Request, template string
 
 	w.WriteHeader(status)
 	w.Header().Add("Content-Type", "text/html")
-	w.Write(b.Bytes())
+	if _, err := w.Write(b.Bytes()); err != nil {
+		return fmt.Errorf("error writing response n render: %w", err)
+	}
 
 	return nil
 }

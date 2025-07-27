@@ -25,13 +25,19 @@ type claimsPage struct {
 
 func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 
+	// check if cognito returned an error
+	errStr := r.URL.Query().Get("error")
+	if errStr != "" {
+		return errors.New(errStr)
+	}
+
 	ctx := context.Background()
 	code := r.URL.Query().Get("code")
 
 	// Check no one tampered with the request
 	state := r.URL.Query().Get("state")
 	if state != s.Config.AWS.State {
-		return errors.New("stae was modified!")
+		return errors.New("stae was modified")
 	}
 
 	// Exchange the authorization code for a token

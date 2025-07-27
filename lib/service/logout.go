@@ -1,10 +1,15 @@
 package service
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 func (s *Service) logout(w http.ResponseWriter, r *http.Request) error {
 
-	s.setSessionVar(r, w, "authInfo", AuthInfo{})
+	if err := s.setSessionVar(r, w, "authInfo", AuthInfo{}); err != nil {
+		return fmt.Errorf("error delting auth session: %w", err)
+	}
 
 	http.Redirect(w, r, "/", http.StatusFound)
 
