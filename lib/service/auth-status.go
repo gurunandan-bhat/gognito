@@ -23,6 +23,23 @@ type claimsPage struct {
 	Email        string
 }
 
+type IDClaims struct {
+	AtHash          string `json:"at_hash"`
+	Audience        string `json:"aud"`
+	AuthTime        int64  `json:"auth_time"`
+	CognitoUsername string `json:"cognito:username"`
+	Email           string `json:"email"`
+	EmailVerified   bool   `json:"email_verified"`
+	EventID         string `json:"event_id"`
+	IAT             int64  `json:"iat"`
+	Issuer          string `json:"iss"`
+	JTI             string `json:"jti"`
+	Name            string `json:"name"`
+	OriginJTI       string `json:"origin_jti"`
+	Subject         string `json:"sub"`
+	TokenUse        string `json:"token_use"`
+}
+
 func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 
 	// check if cognito returned an error
@@ -97,11 +114,7 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 		return fmt.Errorf("error verifying ID token: %w", err)
 	}
 
-	var idClaims struct {
-		Name     string `json:"name,omitempty"`
-		Email    string `json:"email"`
-		Verified bool   `json:"email_verified"`
-	}
+	idClaims := IDClaims{}
 	if err := idToken.Claims(&idClaims); err != nil {
 		return fmt.Errorf("error extracting Claims: %w", err)
 	}

@@ -39,12 +39,12 @@ func (s *Service) login(w http.ResponseWriter, r *http.Request) error {
 		return fmt.Errorf("error generating %d random bytes: %v", stateLength, err)
 	}
 	codeVerifier = hex.EncodeToString(buf)
-	sha2 := sha256.New()
-	_, err = io.WriteString(sha2, codeVerifier)
+	sha256 := sha256.New()
+	_, err = io.WriteString(sha256, codeVerifier)
 	if err != nil {
 		return fmt.Errorf("error encoding verifier to SHA256: %w", err)
 	}
-	codeChallenge := base64.RawURLEncoding.EncodeToString(sha2.Sum(nil))
+	codeChallenge := base64.RawURLEncoding.EncodeToString(sha256.Sum(nil))
 
 	urlStr := aws.Oauth2Config.AuthCodeURL(
 		state,
