@@ -12,40 +12,40 @@ const (
 )
 
 type Config struct {
-	InProduction bool   `json:"inProduction,omitempty"`
-	AppRoot      string `json:"appRoot,omitempty"`
-	AppPort      string `json:"appPort,omitempty"`
+	InProduction bool   `mapstructure:"inProduction"`
+	AppRoot      string `mapstructure:"appRoot"`
+	AppPort      string `mapstructure:"appPort"`
 	Db           struct {
-		User                 string `json:"user,omitempty"`
-		Passwd               string `json:"passwd,omitempty"`
-		Net                  string `json:"net,omitempty"`
-		Addr                 string `json:"addr,omitempty"`
-		DBName               string `json:"dbName,omitempty"`
-		ParseTime            bool   `json:"parseTime,omitempty"`
-		Loc                  string `json:"loc,omitempty"`
-		AllowNativePasswords bool   `json:"allowNativePasswords,omitempty"`
-	} `json:"db,omitzero"`
+		User                 string `mapstructure:"user"`
+		Passwd               string `mapstructure:"passwd"`
+		Net                  string `mapstructure:"net"`
+		Addr                 string `mapstructure:"addr"`
+		DBName               string `mapstructure:"dbName"`
+		ParseTime            bool   `mapstructure:"parseTime"`
+		Loc                  string `mapstructure:"loc"`
+		AllowNativePasswords bool   `mapstructure:"allowNativePasswords"`
+	} `mapstructure:"db"`
 	Security struct {
-		CSRFKey string `json:"csrfKey,omitempty"`
-	} `json:"security,omitzero"`
+		CSRFKey string `mapstructure:"csrfKey"`
+	} `mapstructure:"security"`
 	Session struct {
-		Name              string `json:"name,omitempty"`
-		Path              string `json:"path,omitempty"`
-		Domain            string `json:"domain,omitempty"`
-		MaxAgeHours       int    `json:"maxAgeHours,omitempty"`
-		AuthenticationKey string `json:"authenticationKey,omitempty"`
-		EncryptionKey     string `json:"encryptionKey,omitempty"`
-	} `json:"session,omitzero"`
+		Name              string `mapstructure:"name"`
+		Path              string `mapstructure:"path"`
+		Domain            string `mapstructure:"domain"`
+		MaxAgeHours       int    `mapstructure:"maxAgeHours"`
+		AuthenticationKey string `mapstructure:"authenticationKey"`
+		EncryptionKey     string `mapstructure:"encryptionKey"`
+	} `mapstructure:"session"`
 	AWS struct {
-		ClientID     string `json:"clientID,omitempty"`
-		ClientSecret string `json:"clientSecret,omitempty"`
-		AppDomain    string `json:"appDomain,omitempty"`
-		IssuerURL    string `json:"issuerURL,omitempty"`
-		RedirectURL  string `json:"redirectURL,omitempty"`
-		KeySetURL    string `json:"keySetURL,omitempty"`
-		LogoutURL    string `json:"logoutURL,omitempty"`
-		State        string `json:"state,omitempty"`
-	} `json:"aws,omitzero"`
+		ClientID     string `mapstructure:"clientID"`
+		ClientSecret string `mapstructure:"clientSecret"`
+		AppDomain    string `mapstructure:"appDomain"`
+		IssuerURL    string `mapstructure:"issuerURL"`
+		RedirectURL  string `mapstructure:"redirectURL"`
+		KeySetURL    string `mapstructure:"keySetURL"`
+		LogoutURL    string `mapstructure:"logoutURL"`
+		State        string `mapstructure:"state"`
+	} `mapstructure:"aws"`
 }
 
 var c = Config{}
