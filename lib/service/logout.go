@@ -7,7 +7,7 @@ import (
 
 func (s *Service) logout(w http.ResponseWriter, r *http.Request) error {
 
-	if err := s.setSessionVar(r, w, "authInfo", AuthInfo{}); err != nil {
+	if err := s.setSessionVar(r, "authInfo", AuthInfo{}); err != nil {
 		return fmt.Errorf("error delting auth session: %w", err)
 	}
 

@@ -1,14 +1,13 @@
 package service
 
 import (
-	"encoding/gob"
-	"fmt"
 	"gognito/lib/config"
 	"gognito/lib/model"
 	"net/http"
 	"time"
 
-	mysqlstore "github.com/danielepintore/gorilla-sessions-mysql"
+	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/v2"
 )
 
 type AuthInfo struct {
@@ -19,49 +18,29 @@ type AuthInfo struct {
 	LogoutURL string
 }
 
-func newDbSessionStore(cfg *config.Config, m *model.Model) (*mysqlstore.MysqlStore, error) {
+func newDbSessionStore(cfg *config.Config, m *model.Model) *scs.SessionManager {
 
-	keyPair := mysqlstore.KeyPair{
-		AuthenticationKey: []byte(cfg.Session.AuthenticationKey),
-		EncryptionKey:     []byte(cfg.Session.EncryptionKey),
-	}
+	sessMgr := scs.New()
+	sessMgr.Store = mysqlstore.New(m.DbHandle.DB)
 
-	// register so gorilla can save complex data structures
-	gob.Register(&AuthInfo{})
+	sessMgr.Lifetime = 1 * time.Hour
+	sessMgr.Cookie.Name = cfg.Session.CookieName
+	sessMgr.Cookie.HttpOnly = true
+	sessMgr.Cookie.Path = "/"
+	sessMgr.Cookie.Persist = true
+	sessMgr.Cookie.SameSite = http.SameSiteStrictMode
+	sessMgr.Cookie.Secure = cfg.InProduction
+	sessMgr.Cookie.Partitioned = false
 
-	cleanupAfter := 60 * time.Minute
-	return mysqlstore.NewMysqlStore(
-		m.DbHandle.DB,
-		"mdbsession",
-		[]mysqlstore.KeyPair{keyPair},
-		mysqlstore.WithPath("/"),
-		mysqlstore.WithCleanupInterval(cleanupAfter),
-		mysqlstore.WithHttpOnly(true),
-		mysqlstore.WithSameSite(http.SameSiteLaxMode),
-		mysqlstore.WithMaxAge(cfg.Session.MaxAgeHours*3600),
-		mysqlstore.WithSecure(cfg.InProduction),
-	)
+	return sessMgr
 }
 
-func (s *Service) getSessionVar(r *http.Request, name any) (any, error) {
+func (s *Service) setSessionVar(r *http.Request, key string, value any) error {
 
-	sessionName := s.Config.Session.Name
-	session, err := s.SessionStore.Get(r, sessionName)
-	if err != nil {
-		return nil, fmt.Errorf("error fetching session %s: %w", sessionName, err)
-	}
-
-	return session.Values[name.(string)], nil
+	return nil
 }
 
-func (s *Service) setSessionVar(r *http.Request, w http.ResponseWriter, name string, value any) error {
+func (s *Service) getSessionVar(r *http.Request, key string) (any, error) {
 
-	sessionName := s.Config.Session.Name
-	session, err := s.SessionStore.Get(r, sessionName)
-	if err != nil {
-		return fmt.Errorf("error fetching session %s: %w", sessionName, err)
-	}
-
-	session.Values[name] = value
-	return session.Save(r, w)
+	return nil, nil
 }

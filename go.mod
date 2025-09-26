@@ -4,16 +4,14 @@ go 1.24.5
 
 require (
 	github.com/MicahParks/keyfunc/v3 v3.6.2
+	github.com/alexedwards/scs/mysqlstore v0.0.0-20250417082927-ab20b3feb5e9
+	github.com/alexedwards/scs/v2 v2.9.0
 	github.com/coreos/go-oidc/v3 v3.15.0
-	github.com/danielepintore/gorilla-sessions-mysql v0.1.5
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/go-chi/cors v1.2.2
 	github.com/go-chi/httplog/v3 v3.2.2
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/golang-jwt/jwt/v5 v5.3.0
-	github.com/gorilla/csrf v1.7.3
-	github.com/gorilla/securecookie v1.1.2
-	github.com/gorilla/sessions v1.4.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/spf13/viper v1.21.0
 	golang.org/x/oauth2 v0.31.0

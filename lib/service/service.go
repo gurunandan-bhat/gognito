@@ -13,11 +13,10 @@ import (
 	"path"
 	"path/filepath"
 
-	mysqlstore "github.com/danielepintore/gorilla-sessions-mysql"
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/gorilla/csrf"
 )
 
 var logoutURL string
@@ -26,7 +25,7 @@ type Service struct {
 	Config       *config.Config
 	Model        *model.Model
 	Muxer        *chi.Mux
-	SessionStore *mysqlstore.MysqlStore
+	SessionStore *scs.SessionManager
 	Template     map[string]*template.Template
 	Logger       *slog.Logger
 }
@@ -43,25 +42,21 @@ func NewService(cfg *config.Config) (*Service, error) {
 		))
 	}
 
+	csrf := http.NewCrossOriginProtection()
+	mux.Use(csrf.Handler)
+
 	mux.Use(middleware.RequestID)
 	mux.Use(middleware.RealIP)
 	mux.Use(middleware.Recoverer)
 
 	mux.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:*"},
+		AllowedOrigins:   []string{"http://localhost:" + cfg.AppPort},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: false,
+		AllowCredentials: true,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
-
-	csrfMiddleware := csrf.Protect(
-		[]byte(cfg.Security.CSRFKey),
-		csrf.Secure(cfg.InProduction),
-		csrf.SameSite(csrf.SameSiteStrictMode),
-	)
-	mux.Use(csrfMiddleware)
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	mux.Use(newSlogger(cfg, logger))
@@ -71,10 +66,8 @@ func NewService(cfg *config.Config) (*Service, error) {
 		log.Fatalf("error initializing model: %s", err)
 	}
 
-	sessionStore, err := newDbSessionStore(cfg, model)
-	if err != nil {
-		log.Fatalf("error initializing db store: %s", err)
-	}
+	sessionStore := newDbSessionStore(cfg, model)
+	mux.Use(sessionStore.LoadAndSave) // FIXME: no middleware required for /assets
 
 	// Static file handler
 	filesDir := http.Dir(filepath.Join(cfg.AppRoot, "assets"))

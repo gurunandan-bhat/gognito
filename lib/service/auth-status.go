@@ -128,7 +128,7 @@ func (s *Service) handleCallback(w http.ResponseWriter, r *http.Request) error {
 		LogoutURL: logoutURL,
 	}
 
-	if err := s.setSessionVar(r, w, "authInfo", auth); err != nil {
+	if err := s.setSessionVar(r, "authInfo", auth); err != nil {
 		return fmt.Errorf("unable to set auth value in session: %w", err)
 	}
 
